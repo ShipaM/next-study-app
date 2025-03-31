@@ -1,34 +1,40 @@
+"use client";
 import { Post } from "@/type/type";
-import { Metadata } from "next";
-import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { getAllPosts } from "../../../services/getPosts";
+import { Posts } from "@/components/Posts";
+import { PostSearch } from "@/components/PostSearch";
 
-async function getData() {
-  const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
-    next: {
-      revalidate: 60,
-    },
-  });
+// async function getData() {
+//   const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
+//     next: {
+//       revalidate: 60,
+//     },
+//   });
 
-  return response.json();
-}
+//   return response.json();
+// }
 
-export const metadata: Metadata = {
-  title: "Blog | Next App",
-};
+// export const metadata: Metadata = {
+//   title: "Blog | Next App",
+// };
 
-const Blog = async () => {
-  const posts: Post[] = (await getData()) || [];
+const Blog = () => {
+  // const posts: Post[] = (await getData()) || [];
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    getAllPosts()
+      .then(setPosts)
+      .finally(() => setIsLoading(false));
+  }, []);
+
   return (
     <>
       <h1>Blog</h1>
-      <ul>
-        {posts.map((post: Post) => (
-          <li key={post.id}>
-            <Link href={`/blog/${post.id}`}>{post.title}</Link>
-          </li>
-        ))}
-      </ul>
+      <PostSearch onSearch={setPosts} />
+      {isLoading ? <>Loading...</> : <Posts posts={posts} />}
     </>
   );
 };
